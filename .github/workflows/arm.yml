@@ -1,0 +1,20 @@
+name: Build ARM32
+
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: CMake ARM
+      run: |
+        mkdir build && cd build
+        cmake .. -DARCH=arm -GNinja -DCMAKE_BUILD_TYPE=Release
+        ninja ntoskrnl hal
+    
+    - uses: actions/upload-artifact@v4
+      with:
+        name: arm32-kernel
+        path: build/**/ntoskrnl*
