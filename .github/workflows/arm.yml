@@ -14,15 +14,16 @@ jobs:
         sudo apt-get install -y -qq ninja-build bison flex gcc-arm-none-eabi 2>&1 | tail -1
         arm-none-eabi-gcc --version | head -1
     
+    - name: Patch toolchain
+      run: |
+        sed -i 's/require_program.*windmc)/#windmc skipped/' toolchain-gcc.cmake
+        sed -i 's/require_program.*windres)/#windres skipped/' toolchain-gcc.cmake
+        sed -i 's/require_program.*dlltool)/#dlltool skipped/' toolchain-gcc.cmake
+    
     - name: CMake ARM
       run: |
         mkdir build && cd build
-        cmake .. -DARCH=arm -GNinja \
-          -DCMAKE_TOOLCHAIN_FILE=../toolchain-gcc.cmake \
-          -DCMAKE_C_COMPILER=arm-none-eabi-gcc \
-          -DCMAKE_CXX_COMPILER=arm-none-eabi-g++ \
-          -DMINGW_TOOLCHAIN_PREFIX="" \
-          -DCMAKE_C_FLAGS="-Wno-error" 2>&1 | tail -10
+        cmake .. -DARCH=arm -GNinja           -DCMAKE_MAKE_PROGRAM=$(which ninja)           -DCMAKE_TOOLCHAIN_FILE=../toolchain-gcc.cmake           -DCMAKE_C_COMPILER=arm-none-eabi-gcc           -DMINGW_TOOLCHAIN_PREFIX=""           -DCMAKE_C_FLAGS="-Wno-error" 2>&1 | tail -10
     
     - name: Build ntoskrnl + HAL
       run: |
